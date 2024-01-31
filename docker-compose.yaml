@@ -1,0 +1,30 @@
+version: "3.0"
+
+services:
+  app:
+    build: ./app/
+    ports:
+      - "8000:8000"
+    restart: always
+
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./db/data:/var/lib/postgresql/data
+      - ./db/logs:/var/log/postgresql
+      - ./db/config:/var/lib/postgresql/config
+
+  redis:
+    image: redis:6.2.6-alpine
+    restart: always
+    ports:
+      - "6379:6379"
