@@ -20,7 +20,10 @@ def create_pipeline(name: str, db: Session) -> Pipeline:
     db.refresh(db_pipeline)
     return db_pipeline
 def edit_pipeline(pipeline_id: int, name: str, db: Session) -> Pipeline:
+   
     db_pipeline = get_pipeline(pipeline_id, db)
+    if db_pipeline is None:
+        return None
     db_pipeline.name = name
     db.commit()
     db.refresh(db_pipeline)

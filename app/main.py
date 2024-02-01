@@ -21,23 +21,27 @@ app = FastAPI()
 
 # CRUD for pipline
 @app.get("/piplines")
-async def get_piplines_route(db: Session = Depends(get_db)) -> list[Pipline]:
-    return get_piplines_list(db)
-
+async def get_piplines_route(db: Session = Depends(get_db), status_code=201) -> list[Pipline]:
+    res = get_piplines_list(db)
+    if res == []:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return res
 @app.get("/piplines/{pipeline_id}")
 async def get_pipeline_by_id_route(pipeline_id: int, db: Session = Depends(get_db), response_model=Pipline, status_code=status.HTTP_200_OK):
         res = get_pipeline(pipeline_id, db)
         if res is None:
             raise HTTPException(status_code=404, detail="Item not found")
         return res
-@app.post("/piplines", status_code=201)
-async def create_pipeline_route(pipline: Pipline, db: Session = Depends(get_db)) -> Pipline:
+@app.post("/piplines")
+async def create_pipeline_route(pipline: Pipline, db: Session = Depends(get_db), status_code=201) -> Pipline:
     return create_pipeline(pipline.name, db)
 
 @app.put("/piplines/{pipeline_id}", status_code=status.HTTP_200_OK)
 async def edit_pipeline_route(pipeline_id: int, pipline: Pipline, db: Session = Depends(get_db)):
-    return edit_pipeline(pipeline_id, pipline.name, db)
-
+    res = edit_pipeline(pipeline_id, pipline.name, db)
+    if res is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return res
 @app.delete("/piplines/{pipeline_id}")
 async def delete_pipeline_route(pipeline_id: int, pipline: Pipline, db: Session = Depends(get_db)):
     return delete_pipeline(pipeline_id, db)
