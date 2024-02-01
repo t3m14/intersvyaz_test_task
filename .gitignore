@@ -4,5 +4,6 @@ venv
 env
 
 db
+redis
 
 __pycache__

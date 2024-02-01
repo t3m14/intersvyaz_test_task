@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from database.models import Pipeline, PipelineStep
+from app.database.models import Pipeline, PipelineStep
 
 def get_steps_list_by_pipeline(pipeline_id: int, db: Session) -> list[PipelineStep]:
     return db.query(PipelineStep).filter(PipelineStep.pipeline_id == pipeline_id).all()

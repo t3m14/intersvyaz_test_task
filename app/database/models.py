@@ -1,6 +1,6 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from database.database import Base
+from app.database.database import Base
 
 class Pipeline(Base):
     __tablename__ = 'pipelines'

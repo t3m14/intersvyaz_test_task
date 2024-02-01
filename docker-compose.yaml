@@ -1,11 +1,42 @@
 version: "3.0"
 
 services:
-  app:
-    build: ./app/
-    ports:
-      - "8000:8000"
-    restart: always
+  # celery:
+  #   build: ./app/
+  #   restart: always
+  #   depends_on:
+  #     - redis
+  #   command: celery -A app.tasks.tasks:celery worker --loglevel=INFO --pool=solo #--pool=solo is required for windows
+  # flower:
+  #   build:
+  #     context: ./app/
+  #   ports:
+  #    - "5555:5555"
+  #   command:  ['celery', 'flower', '-A', 'tasks']
+  #   environment:
+  #     CELERY_BROKER_URL: redis://redis:6379/0
+  #     CELERY_RESULT_BACKEND: redis://redis:6379/0
+  #   depends_on:
+  #     - redis
+  #     - celery
+
+  # app:
+  #   build: ./app/
+  #   ports:
+  #     - "8000:8000"
+  #   restart: always
+  #   # command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+  #   depends_on:
+  #     - db
+  #     - redis
+
+  #   develop:
+  #     watch:
+  #       - action: sync
+  #         path: ./
+  #         target: /code/
+  #       - action: rebuild
+  #         path: ./app/
 
   db:
     image: postgres:14.1-alpine
@@ -16,15 +47,19 @@ services:
       - POSTGRES_DB=postgres
 
     ports:
-      - "5432:5432"
+      - "1234:5432"
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - ./db/data:/var/lib/postgresql/data
       - ./db/logs:/var/log/postgresql
       - ./db/config:/var/lib/postgresql/config
-
+    
   redis:
     image: redis:6.2.6-alpine
     restart: always
     ports:
       - "6379:6379"
+    volumes:
+      - ./redis/data:/data
+      - ./redis/logs:/var/log/redis
+      - ./redis/config:/etc/redis/redis.conf

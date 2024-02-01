@@ -1,49 +1,65 @@
-from fastapi import FastAPI
-from database.piplines import get_piplines_list, get_pipeline_steps, get_pipeline, create_pipeline, edit_pipeline, delete_
-from database.pipline_steps import get_steps_list_by_pipeline, get_step, create_step, edit_step, delete
+from fastapi import FastAPI, Depends, status, HTTPException
+from app.database.piplines import get_piplines_list, get_pipeline_steps, get_pipeline, create_pipeline, edit_pipeline, delete_pipeline
+from app.database.pipline_steps import get_steps_list_by_pipeline, get_step, create_step, edit_step, delete_step
+from app.database.database import SessionLocal, Base, engine
+from app.schemas.pipline_schema import Pipline
+from app.schemas.pipline_step_schema import Step
+from sqlalchemy.orm import Session
 
+
+Base.metadata.create_all(bind=engine)
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 app = FastAPI()
 
 # CRUD for pipline
 @app.get("/piplines")
-async def get_piplines():
-    return get_piplines_list()
+async def get_piplines_route(db: Session = Depends(get_db)) -> list[Pipline]:
+    return get_piplines_list(db)
 
 @app.get("/piplines/{pipeline_id}")
-async def get_pipeline_by_id(pipeline_id: int):
-    return get_pipeline(pipeline_id)
+async def get_pipeline_by_id_route(pipeline_id: int, db: Session = Depends(get_db), response_model=Pipline, status_code=status.HTTP_200_OK):
+        res = get_pipeline(pipeline_id, db)
+        if res is None:
+            raise HTTPException(status_code=404, detail="Item not found")
+        return res
+@app.post("/piplines", status_code=201)
+async def create_pipeline_route(pipline: Pipline, db: Session = Depends(get_db)) -> Pipline:
+    return create_pipeline(pipline.name, db)
 
-@app.post("/piplines")
-async def create_pipeline(name: str):
-    return create_pipeline(name)
-
-@app.put("/piplines/{pipeline_id}")
-async def edit_pipeline(pipeline_id: int, name: str):
-    return edit_pipeline(pipeline_id, name)
+@app.put("/piplines/{pipeline_id}", status_code=status.HTTP_200_OK)
+async def edit_pipeline_route(pipeline_id: int, pipline: Pipline, db: Session = Depends(get_db)):
+    return edit_pipeline(pipeline_id, pipline.name, db)
 
 @app.delete("/piplines/{pipeline_id}")
-async def delete_pipeline(pipeline_id: int):
-    return delete_pipeline(pipeline_id)
+async def delete_pipeline_route(pipeline_id: int, pipline: Pipline, db: Session = Depends(get_db)):
+    return delete_pipeline(pipeline_id, db)
 
 # CRUD for pipline steps
 @app.get("/piplines/{pipeline_id}/steps")
-async def get_steps_by_pipeline(pipeline_id: int):
-    return get_steps_list_by_pipeline(pipeline_id)
+async def get_steps_by_pipeline_route(pipeline_id: int, step: Step, db: Session = Depends(get_db)):
+    return get_steps_list_by_pipeline(pipeline_id, db)
 
 @app.get("/piplines/{pipeline_id}/steps/{step_id}")
-async def get_step_by_id(pipeline_id: int, step_id: int):
-    return get_step(step_id)
+async def get_step_by_id_route(pipeline_id: int, step_id: int, step: Step, db: Session = Depends(get_db)):
+    return get_step(step_id, db)
 
 @app.post("/piplines/{pipeline_id}/steps")
-async def create_step(pipeline_id: int, name: str, order: int):
-    return create_step(name, order, pipeline_id)
+async def create_step_route(pipeline_id: int, name: str, order: int, step: Step, db: Session = Depends(get_db)):
+    return create_step(name, order, pipeline_id, db)
 
 @app.put("/piplines/{pipeline_id}/steps/{step_id}")
-async def edit_step(pipeline_id: int, step_id: int, name: str, order: int):
-    return edit_step(step_id, name, order, pipeline_id)
+async def edit_step_route(pipeline_id: int, step_id: int, name: str, order: int, step: Step, db: Session = Depends(get_db)):
+    return edit_step(step_id, name, order, pipeline_id, db)
 
 @app.delete("/piplines/{pipeline_id}/steps/{step_id}")
-async def delete_step(pipeline_id: int, step_id: int):
-    return delete_step(step_id)
+async def delete_step_route(pipeline_id: int, step_id: int, step: Step, db: Session = Depends(get_db)):
+    return delete_step(step_id, db)
 

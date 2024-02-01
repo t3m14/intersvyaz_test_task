@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from database.models import Pipeline, PipelineStep
+from app.database.models import Pipeline, PipelineStep
 
 def get_piplines_list(db: Session) -> list[Pipeline]:
     return db.query(Pipeline).all()
@@ -8,7 +8,11 @@ def get_pipeline_steps(pipeline_id: int, db: Session) -> list[PipelineStep]:
     return db.query(PipelineStep).filter(PipelineStep.pipeline_id == pipeline_id).all()
 
 def get_pipeline(pipeline_id: int, db: Session) -> Pipeline:
-    return db.query(Pipeline).filter(Pipeline.id == pipeline_id).first()
+    try:
+        return db.query(Pipeline).filter(Pipeline.id == pipeline_id).first()
+    except:
+        return None
+    
 def create_pipeline(name: str, db: Session) -> Pipeline:
     db_pipeline = Pipeline(name=name)
     db.add(db_pipeline)
