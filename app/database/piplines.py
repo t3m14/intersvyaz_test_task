@@ -30,6 +30,8 @@ def edit_pipeline(pipeline_id: int, name: str, db: Session) -> Pipeline:
     return db_pipeline
 def delete_pipeline(pipeline_id: int, db: Session) -> Pipeline:
     db_pipeline = get_pipeline(pipeline_id, db)
+    if db_pipeline is None:
+        return None
     db.delete(db_pipeline)
     db.commit()
     return db_pipeline

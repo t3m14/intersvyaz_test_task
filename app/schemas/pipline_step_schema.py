@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 
 class Step(BaseModel):
-    id: int|None = Field(auto_increment=True, pk_field=True, alias='_id')
-    name: str
+    id: Optional[int] = None
+    name: str 
     order: int
-    pipeline_id: int

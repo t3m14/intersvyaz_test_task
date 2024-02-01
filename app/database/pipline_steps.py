@@ -16,6 +16,8 @@ def create_step(name: str, order: int, pipeline_id: int, db: Session) -> Pipelin
 
 def edit_step(step_id: int, name: str, order: int, pipeline_id: int, db: Session) -> Pipeline:
     db_step = get_step(step_id, db)
+    if db_step is None:
+        return None
     db_step.name = name
     db_step.order = order
     db_step.pipeline_id = pipeline_id
@@ -24,6 +26,8 @@ def edit_step(step_id: int, name: str, order: int, pipeline_id: int, db: Session
     return db_step
 def delete_step(step_id: int, db: Session) -> Pipeline:
     db_step = get_step(step_id, db)
+    if db_step is None:
+        return None
     db.delete(db_step)
     db.commit()
     return db_step

@@ -44,26 +44,41 @@ async def edit_pipeline_route(pipeline_id: int, pipline: Pipline, db: Session = 
     return res
 @app.delete("/piplines/{pipeline_id}")
 async def delete_pipeline_route(pipeline_id: int, pipline: Pipline, db: Session = Depends(get_db)):
-    return delete_pipeline(pipeline_id, db)
-
+    res = delete_pipeline(pipeline_id, db)
+    if res is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return res
+    
 # CRUD for pipline steps
 @app.get("/piplines/{pipeline_id}/steps")
-async def get_steps_by_pipeline_route(pipeline_id: int, step: Step, db: Session = Depends(get_db)):
-    return get_steps_list_by_pipeline(pipeline_id, db)
-
+async def get_steps_by_pipeline_route(pipeline_id: int, db: Session = Depends(get_db)) -> list[Step]:
+    res = get_steps_list_by_pipeline(pipeline_id, db)
+    if res == []:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return res
 @app.get("/piplines/{pipeline_id}/steps/{step_id}")
 async def get_step_by_id_route(pipeline_id: int, step_id: int, step: Step, db: Session = Depends(get_db)):
-    return get_step(step_id, db)
+    res = get_step(step_id, db)
+    if res is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return res
 
 @app.post("/piplines/{pipeline_id}/steps")
-async def create_step_route(pipeline_id: int, name: str, order: int, step: Step, db: Session = Depends(get_db)):
-    return create_step(name, order, pipeline_id, db)
+async def create_step_route(pipeline_id: int, step: Step, db: Session = Depends(get_db)):
+    return create_step(step.name, step.order, pipeline_id, db)
 
 @app.put("/piplines/{pipeline_id}/steps/{step_id}")
 async def edit_step_route(pipeline_id: int, step_id: int, name: str, order: int, step: Step, db: Session = Depends(get_db)):
-    return edit_step(step_id, name, order, pipeline_id, db)
-
+    res = edit_step(step_id, name, order, pipeline_id, db)
+    if res is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return res
+    
 @app.delete("/piplines/{pipeline_id}/steps/{step_id}")
 async def delete_step_route(pipeline_id: int, step_id: int, step: Step, db: Session = Depends(get_db)):
-    return delete_step(step_id, db)
+    res = delete_step(step_id, db)
+    
+    if res is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return res
 
