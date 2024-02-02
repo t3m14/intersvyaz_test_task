@@ -6,7 +6,6 @@ from celery import Celery
 celery = Celery('tasks', broker='redis://localhost:6379/0')
 
 
-
 @celery.task
 def resize_and_convert_to_base64(image):
     # Преобразовать изображение в numpy-массив
