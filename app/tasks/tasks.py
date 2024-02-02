@@ -3,10 +3,12 @@ import base64
 import numpy as np
 from celery import Celery
 
-app = Celery('tasks', broker='redis://localhost:6379/0')
+celery = Celery('tasks', broker='redis://localhost:6379/0')
 
-@app.task
-def apply_pipeline(image, pipeline_id):
+
+
+@celery.task
+def resize_and_convert_to_base64(image):
     # Преобразовать изображение в numpy-массив
     np_array = np.frombuffer(image, np.uint8)
     img = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
@@ -23,13 +25,13 @@ def apply_pipeline(image, pipeline_id):
 
     return base64_str
 
-@app.task
+@celery.task
 def run_ml_model(processed_image):
     # Имитация работы модели машинного обучения
     # TODO: реализовать логику работы модели
     return [100, 100, 200, 200, 0.9, 1]  # Пример координат бокса автомобиля
 
-@app.task
+@celery.task
 def save_to_db(detected_box):
     # Сохранение информации в БД
     # TODO: реализовать сохранение в БД

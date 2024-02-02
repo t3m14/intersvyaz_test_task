@@ -5,7 +5,10 @@ from app.database.database import SessionLocal, Base, engine
 from app.schemas.pipline_schema import Pipline
 from app.schemas.pipline_step_schema import Step
 from sqlalchemy.orm import Session
+from typing import Annotated
 
+
+from app.tasks.tasks import *
 
 Base.metadata.create_all(bind=engine)
 
@@ -19,6 +22,30 @@ def get_db():
 
 app = FastAPI()
 
+
+from fastapi import FastAPI, UploadFile, File
+
+app = FastAPI()
+
+@app.post("/process_image")
+async def process_image(image: Annotated[bytes, File(description="A file read as bytes")], pipeline_id: int, db: Session = Depends(get_db)):
+    
+    steps = get_steps_list_by_pipeline(pipeline_id, db)
+    processed_image, detected_box = None, None
+    for step in step:
+        # Подумать над тем, как избежать бесконечные if step == stepname
+        
+        if step == 'resize_and_convert_to_base64':
+            # Обработка изображения
+            processed_image = await resize_and_convert_to_base64.delay(image, pipeline_id)
+        if step == 'run_ml_model':
+            # Прогон обработанного изображения через модель машинного обучения
+            detected_box = await run_ml_model.delay(processed_image)
+        if step =='save_to_db':
+            # Сохранение в БД информации
+            await save_to_db.delay(detected_box)
+
+    return {"message": "Image processed successfully"}
 # CRUD for pipline
 @app.get("/piplines")
 async def get_piplines_route(db: Session = Depends(get_db), status_code=201) -> list[Pipline]:
@@ -48,7 +75,10 @@ async def delete_pipeline_route(pipeline_id: int, pipline: Pipline, db: Session 
     if res is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return res
-    
+
+
+
+
 # CRUD for pipline steps
 @app.get("/piplines/{pipeline_id}/steps")
 async def get_steps_by_pipeline_route(pipeline_id: int, db: Session = Depends(get_db)) -> list[Step]:

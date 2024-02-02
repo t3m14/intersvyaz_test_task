@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from app.database.models import Pipeline, PipelineStep
-
+from sqlalchemy import asc
 def get_steps_list_by_pipeline(pipeline_id: int, db: Session) -> list[PipelineStep]:
-    return db.query(PipelineStep).filter(PipelineStep.pipeline_id == pipeline_id).all()
+    return db.query(PipelineStep).filter(PipelineStep.pipeline_id == pipeline_id).order_by(asc(PipelineStep.order)).all()
 
 def get_step(step_id: int, db: Session) -> PipelineStep:
     return db.query(PipelineStep).filter(PipelineStep.id == step_id).first()
