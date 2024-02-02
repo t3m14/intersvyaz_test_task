@@ -40,6 +40,6 @@ def save_to_db(detected_box):
 
     # Сохранение информации в БД
     if detected_box:
-        create_auto(is_detected=detected_box[0], x_coord=detected_box[1], y_coord=detected_box[2], y_coord=detected_box[3], db=db)
+        create_auto(is_detected=True, x_coord=detected_box[0], y_coord=detected_box[1],w=detected_box[2], h=detected_box[3], db=db)
     else:
         create_auto(is_detected=False, db=db)

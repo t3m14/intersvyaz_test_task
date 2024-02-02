@@ -23,4 +23,6 @@ class Auto(Base):
     is_detected = Column(Boolean)
     x_coord = Column(Integer, nullable=True)
     y_coord = Column(Integer, nullable=True)
+    w = Column(Integer, nullable=True)
+    h = Column(Integer, nullable=True)
     
