@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, status, HTTPException
+from fastapi import FastAPI, Depends, status, HTTPException, File
 from app.database.piplines import get_piplines_list, get_pipeline_steps, get_pipeline, create_pipeline, edit_pipeline, delete_pipeline
 from app.database.pipline_steps import get_steps_list_by_pipeline, get_step, create_step, edit_step, delete_step
 from app.database.database import SessionLocal, Base, engine
@@ -23,7 +23,6 @@ def get_db():
 app = FastAPI()
 
 
-from fastapi import FastAPI, UploadFile, File
 
 app = FastAPI()
 
@@ -70,7 +69,7 @@ async def edit_pipeline_route(pipeline_id: int, pipline: Pipline, db: Session = 
         raise HTTPException(status_code=404, detail="Item not found")
     return res
 @app.delete("/piplines/{pipeline_id}")
-async def delete_pipeline_route(pipeline_id: int, pipline: Pipline, db: Session = Depends(get_db)):
+async def delete_pipeline_route(pipeline_id: int, db: Session = Depends(get_db)):
     res = delete_pipeline(pipeline_id, db)
     if res is None:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -87,7 +86,7 @@ async def get_steps_by_pipeline_route(pipeline_id: int, db: Session = Depends(ge
         raise HTTPException(status_code=404, detail="Item not found")
     return res
 @app.get("/piplines/{pipeline_id}/steps/{step_id}")
-async def get_step_by_id_route(pipeline_id: int, step_id: int, step: Step, db: Session = Depends(get_db)):
+async def get_step_by_id_route(pipeline_id: int, step_id: int, db: Session = Depends(get_db)):
     res = get_step(step_id, db)
     if res is None:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -98,14 +97,14 @@ async def create_step_route(pipeline_id: int, step: Step, db: Session = Depends(
     return create_step(step.name, step.order, pipeline_id, db)
 
 @app.put("/piplines/{pipeline_id}/steps/{step_id}")
-async def edit_step_route(pipeline_id: int, step_id: int, name: str, order: int, step: Step, db: Session = Depends(get_db)):
-    res = edit_step(step_id, name, order, pipeline_id, db)
+async def edit_step_route(pipeline_id: int, step_id: int, step: Step, db: Session = Depends(get_db)):
+    res = edit_step(step_id, step.name, step.order, pipeline_id, db)
     if res is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return res
     
 @app.delete("/piplines/{pipeline_id}/steps/{step_id}")
-async def delete_step_route(pipeline_id: int, step_id: int, step: Step, db: Session = Depends(get_db)):
+async def delete_step_route(pipeline_id: int, step_id: int, db: Session = Depends(get_db)):
     res = delete_step(step_id, db)
     
     if res is None:
