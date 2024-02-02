@@ -19,6 +19,8 @@ class PipelineStep(Base):
     pipeline = relationship("Pipeline", back_populates="steps")
 
 class Auto(Base):
+    __tablename__ = 'auto'
+
     id = Column(Integer, primary_key=True)
     is_detected = Column(Boolean)
     x_coord = Column(Integer, nullable=True)
