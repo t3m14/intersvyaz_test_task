@@ -12,20 +12,25 @@ client_app = TestClient(app_app)
 def test_process_image():
     # Подготовка данных для отправки запроса
     image_bytes = b'fake_image_bytes'
-    pipeline_id = 1
+    response = client_app.post("/piplines", json={"name": "Test Pipeline"})
+    data = response.json()
+    pipeline_id = data["id"]
+    step1 = client_app.post(f"/piplines/{pipeline_id}/steps", json={"name": "resize_and_convert_to_base64", "order": "1"})
+    step2 = client_app.post(f"/piplines/{pipeline_id}/steps", json={"name": "run_ml_model", "order": "2"})
+    step3 = client_app.post(f"/piplines/{pipeline_id}/steps", json={"name": "save_to_db", "order": "3"})
 
-    with patch("main.resize_and_convert_to_base64") as mock_resize, patch("main.run_ml_model") as mock_ml, patch("main.save_to_db") as mock_save:
+    with patch("app.tasks.tasks.resize_and_convert_to_base64") as mock_resize, patch("app.tasks.tasks.run_ml_model") as mock_ml, patch("app.tasks.tasks.save_to_db") as mock_save:
         # Устанавливаем возвращаемые значения при вызове Celery tasks
         mock_resize.return_value = Mock(id="resize_task_id")
         mock_ml.return_value = Mock(id="ml_task_id")
         mock_save.return_value = Mock(id="save_task_id")
 
         # Отправка запроса на обработку изображения
-        response = client_app.post("/process_image", files={"image": ("test.jpg", image_bytes)}, data={"pipeline_id": pipeline_id})
+        response = client_app.post(f"/process_image/{pipeline_id}", files={"image": ("test.jpg", image_bytes)})
 
     # Проверка успешности ответа
-    assert response.status_code == 200
     assert response.json() == {"message": "Image processed successfully"}
+    assert response.status_code == 200
 
     # Проверка вызовов задач
     mock_resize.assert_called_once_with(image_bytes, pipeline_id)
@@ -132,13 +137,13 @@ def test_delete_step():
 
 
 def test_run_ml_model_with_image():
-        file_path = "./test_image.jpeg"
+        file_path = "./test.jpg"
         file = open(file_path, "rb")
-        
-        response = client_ml.post("/ml_model", files={"image": (file_path, file, "image/jpeg")})
-        assert response.status_code == 200
+        response = client_ml.post(
+        "/ml_model", files={"image": ("filename", file, "image/jpeg")}
+        )   
         assert "coordinates" in response.json()
-        os.unlink(file_path)
+        assert response.status_code == 200
 
 def test_run_ml_model_without_image():
     response = client_ml.post("/ml_model")

@@ -20,6 +20,6 @@ def generate_random_coordinates():
         return []
 
 @app.post("/ml_model")
-async def run_ml_model(image: UploadFile = File(...)):
+async def run_ml_model(image: UploadFile = File(...), result_code=200):
     result = generate_random_coordinates.delay()
     return {"coordinates": result}

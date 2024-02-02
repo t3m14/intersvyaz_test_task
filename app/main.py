@@ -1,24 +1,19 @@
 from fastapi import FastAPI, Depends, status, HTTPException, File
 from app.database.piplines import get_piplines_list, get_pipeline_steps, get_pipeline, create_pipeline, edit_pipeline, delete_pipeline
 from app.database.pipline_steps import get_steps_list_by_pipeline, get_step, create_step, edit_step, delete_step
-from app.database.database import SessionLocal, Base, engine
+from app.database.database import get_db, Base, engine
 from app.schemas.pipline_schema import Pipline
 from app.schemas.pipline_step_schema import Step
 from sqlalchemy.orm import Session
 from typing import Annotated
 
+db = get_db()
 
 from app.tasks.tasks import *
 
 Base.metadata.create_all(bind=engine)
 
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
 
 app = FastAPI()
 
@@ -26,14 +21,13 @@ app = FastAPI()
 
 app = FastAPI()
 
-@app.post("/process_image")
+@app.post("/process_image/{pipeline_id}", status_code=status.HTTP_200_OK)
 async def process_image(image: Annotated[bytes, File(description="A file read as bytes")], pipeline_id: int, db: Session = Depends(get_db)):
     
     steps = get_steps_list_by_pipeline(pipeline_id, db)
     processed_image, detected_box = None, None
-    for step in step:
+    for step in steps:
         # Подумать над тем, как избежать бесконечные if step == stepname
-        
         if step == 'resize_and_convert_to_base64':
             # Обработка изображения
             processed_image = await resize_and_convert_to_base64.delay(image, pipeline_id)

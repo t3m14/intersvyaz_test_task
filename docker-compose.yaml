@@ -1,24 +1,24 @@
 version: "3.0"
 
 services:
-  # celery:
-  #   build: ./app/
-  #   restart: always
-  #   depends_on:
-  #     - redis
-  #   command: celery -A app.tasks.tasks:celery worker --loglevel=INFO --pool=solo #--pool=solo is required for windows
-  # flower:
-  #   build:
-  #     context: ./app/
-  #   ports:
-  #    - "5555:5555"
-  #   command:  ['celery', 'flower', '-A', 'tasks']
-  #   environment:
-  #     CELERY_BROKER_URL: redis://redis:6379/0
-  #     CELERY_RESULT_BACKEND: redis://redis:6379/0
-  #   depends_on:
-  #     - redis
-  #     - celery
+  celery:
+    build: ./app/
+    restart: always
+    depends_on:
+      - redis
+    command: celery -A app.tasks.tasks:celery worker --loglevel=INFO --pool=solo #--pool=solo is required for windows
+  flower:
+    build:
+      context: ./app/
+    ports:
+     - "5555:5555"
+    command:  ['celery', 'flower', '-A', 'tasks']
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on:
+      - redis
+      - celery
 
   # app:
   #   build: ./app/
@@ -37,11 +37,11 @@ services:
   #         target: /code/
   #       - action: rebuild
   #         path: ./app/
-  ml:
-    build: ./ml/
-    ports:
-      - "8001:8001"
-    restart: always
+  # ml:
+  #   build: ./ml/
+  #   ports:
+  #     - "8001:8001"
+  #   restart: always
 
       
   db:

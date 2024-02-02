@@ -7,3 +7,11 @@ from app.config import SQLALCHEMY_DATABSE_URI
 engine = create_engine(SQLALCHEMY_DATABSE_URI, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
