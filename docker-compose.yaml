@@ -1,12 +1,18 @@
 version: "3.0"
 
 services:
-  celery:
+  app_celery:
     build: ./app/
     restart: always
     depends_on:
       - redis
     command: celery -A app.tasks.tasks:celery worker --loglevel=INFO --pool=solo #--pool=solo is required for windows
+  ml_celery:
+    build: ./ml/
+    restart: always
+    depends_on:
+      - redis
+    command: celery -A ml.tasks.tasks:celery worker --loglevel=INFO --pool=solo #--pool=solo is required for windows
   flower:
     build:
       context: ./app/
@@ -18,30 +24,31 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
       - redis
-      - celery
+      - app_celery
+      - ml_celery
 
-  # app:
-  #   build: ./app/
-  #   ports:
-  #     - "8000:8000"
-  #   restart: always
-  #   # command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-  #   depends_on:
-  #     - db
-  #     - redis
+  app:
+    build: ./app/
+    ports:
+      - "8000:8000"
+    restart: always
+    # command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    depends_on:
+      - db
+      - redis
 
-  #   develop:
-  #     watch:
-  #       - action: sync
-  #         path: ./
-  #         target: /code/
-  #       - action: rebuild
-  #         path: ./app/
-  # ml:
-  #   build: ./ml/
-  #   ports:
-  #     - "8001:8001"
-  #   restart: always
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /code/
+        - action: rebuild
+          path: ./app/
+  ml:
+    build: ./ml/
+    ports:
+      - "8001:8001"
+    restart: always
 
       
   db:

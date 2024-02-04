@@ -157,3 +157,6 @@ def test_generate_random_coordinates():
         assert all(isinstance(coord, (int, float)) for coord in result[:-1])
         assert 0 <= result[4] <= 1  # Checking confidence value
         assert result[5] == 1  # Making sure the label is 1
+    with patch("app.tasks.tasks.resize_and_convert_to_base64") as mock_ml:
+        # Устанавливаем возвращаемые значения при вызове Celery tasks
+        mock_ml.return_value = Mock(id="resize_task_id")

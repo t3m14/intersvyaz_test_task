@@ -3,7 +3,7 @@ from celery import Celery
 import requests
 from app.database.auto_ml import create_auto
 from app.config import ML_URL
-celery = Celery('tasks', broker='redis://localhost:6379/0')
+celery = Celery('tasks', broker='redis://redis:6379/0')
 
 
 @celery.task
