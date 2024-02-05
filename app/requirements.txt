@@ -15,7 +15,7 @@ colorama==0.4.6
 dnspython==2.5.0
 email-validator==2.1.0.post1
 exceptiongroup==1.2.0
-fastapi==0.109.0
+fastapi==0.109.1
 flower==2.0.1
 greenlet==3.0.3
 h11==0.14.0
